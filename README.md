@@ -1,5 +1,7 @@
 # Towns-and-Nations-Minecraft-plugin
 
+
+# DISCLAIMER : NOTHING IN THIS REPO IS MY OWN WORK, STRICTLY USED FOR COMPARISON
 [![CodeFactor](https://www.codefactor.io/repository/github/leralix/towns-and-nations/badge/main)](https://www.codefactor.io/repository/github/leralix/towns-and-nations/overview/main) 
 [![Crowdin](https://badges.crowdin.net/town-and-nation/localized.svg)](https://crowdin.com/project/town-and-nation)
 
