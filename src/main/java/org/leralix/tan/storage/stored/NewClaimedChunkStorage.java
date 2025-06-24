@@ -10,6 +10,7 @@ import org.leralix.tan.dataclass.territory.TerritoryData;
 import org.leralix.tan.dataclass.territory.TownData;
 import org.leralix.tan.TownsAndNations;
 import org.tan.api.getters.TanTerritoryManager;
+import org.leralix.tan.listeners.ChunkLoadManager;
 
 import java.io.*;
 import java.lang.reflect.Type;
@@ -129,16 +130,91 @@ public class NewClaimedChunkStorage {
     }
 
     public void unclaimChunk(ClaimedChunk2 claimedChunk) {
+        if (claimedChunk == null) {
+            return;
+        }
+        
+        // Get the chunk before removing from map
+        Chunk chunk = claimedChunk.getChunk();
+        
+        // Remove from the claimed chunks map
         claimedChunksMap.remove(getChunkKey(claimedChunk));
+        
+        // CRITICAL: Notify ChunkLoadManager that this chunk was unclaimed
+        // This will schedule the chunk for unloading to prevent memory leaks
+        if (chunk != null) {
+            ChunkLoadManager.getInstance().onChunkUnclaimed(chunk);
+        }
+        
+        // Save the updated data
         save();
-    }
-    public void unclaimChunk(Chunk chunk) {
-        claimedChunksMap.remove(getChunkKey(chunk));
-        save();
+        
+        // Log for debugging (can be removed in production)
+        TownsAndNations.getPlugin().getLogger().info(
+            "[TaN] Unclaimed chunk at " + (chunk != null ? chunk.getX() + "," + chunk.getZ() : "unknown") + 
+            " - scheduled for unload to prevent memory leak"
+        );
     }
 
-    public void unclaimAllChunksFromTerritory(TerritoryData territoryData){
+    /**
+     * Modified unclaimChunk method that properly handles memory cleanup
+     */
+    public void unclaimChunk(Chunk chunk) {
+        if (chunk == null) {
+            return;
+        }
+        
+        // Remove from the claimed chunks map
+        claimedChunksMap.remove(getChunkKey(chunk));
+        
+        // CRITICAL: Notify ChunkLoadManager that this chunk was unclaimed
+        // This will schedule the chunk for unloading to prevent memory leaks
+        ChunkLoadManager.getInstance().onChunkUnclaimed(chunk);
+        
+        // Save the updated data
+        save();
+        
+        // Log for debugging (can be removed in production)
+        TownsAndNations.getPlugin().getLogger().info(
+            "[TaN] Unclaimed chunk at " + chunk.getX() + "," + chunk.getZ() + 
+            " - scheduled for unload to prevent memory leak"
+        );
+    }
+
+    /**
+     * Modified unclaimAllChunksFromTerritory method that properly handles memory cleanup
+     */
+    public void unclaimAllChunksFromTerritory(TerritoryData territoryData) {
+        if (territoryData == null) {
+            return;
+        }
+        
+        // Get all chunks before unclaiming them
+        Collection<ClaimedChunk2> chunksToUnclaim = getAllChunkFrom(territoryData);
+        List<Chunk> chunkObjects = new ArrayList<>();
+        
+        // Collect all chunk objects
+        for (ClaimedChunk2 claimedChunk : chunksToUnclaim) {
+            Chunk chunk = claimedChunk.getChunk();
+            if (chunk != null) {
+                chunkObjects.add(chunk);
+            }
+        }
+        
+        // Remove from map
         unclaimAllChunkFromID(territoryData.getID());
+        
+        // CRITICAL: Notify ChunkLoadManager for each unclaimed chunk
+        // This will schedule all chunks for unloading to prevent memory leaks
+        for (Chunk chunk : chunkObjects) {
+            ChunkLoadManager.getInstance().onChunkUnclaimed(chunk);
+        }
+        
+        // Log for debugging (can be removed in production)
+        TownsAndNations.getPlugin().getLogger().info(
+            "[TaN] Unclaimed " + chunkObjects.size() + " chunks from territory " + 
+            territoryData.getName() + " - all scheduled for unload to prevent memory leak"
+        );
     }
 
     public void unclaimAllChunkFromID(String id) {
@@ -215,5 +291,8 @@ public class NewClaimedChunkStorage {
         }
     }
 
+    
+    
+    
 
 }

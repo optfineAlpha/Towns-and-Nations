@@ -54,6 +54,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
+import org.leralix.tan.listeners.ChunkLoadManager;
 
 /**
  * Main Towns and Nations class, used to load the plugin and to manage the plugin.
@@ -221,6 +222,17 @@ public final class TownsAndNations extends JavaPlugin {
 
         TanAPI.register(new InternalAPI(CURRENT_VERSION,MINIMUM_SUPPORTING_DYNMAP));
         new Metrics(this, 20527);
+        
+        
+        
+        
+        getLogger().log(Level.INFO, "[TaN] -Registering Chunk Load Manager (Memory Leak Prevention)");
+        
+        // Register the ChunkLoadManager to prevent memory leaks from claimed chunks
+        PluginManager pluginManager = Bukkit.getPluginManager();
+        pluginManager.registerEvents(ChunkLoadManager.getInstance(), this);
+        
+        getLogger().log(Level.INFO, "[TaN] -Chunk Load Manager registered successfully");
 
         getLogger().log(Level.INFO,"[TaN] Plugin loaded successfully");
         getLogger().info("\u001B[33m----------------Towns & Nations------------------\u001B[0m");
@@ -289,8 +301,16 @@ public final class TownsAndNations extends JavaPlugin {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
-
-        getLogger().info("[TaN] Plugin disabled");
+        
+        
+        if (ChunkLoadManager.getInstance() != null) {
+            getLogger().log(Level.INFO, "[TaN] -Running emergency chunk cleanup before shutdown");
+            ChunkLoadManager.getInstance().emergencyCleanup();
+        }
+        
+        // ... your existing onDisable code ...
+        
+        getLogger().log(Level.INFO, "[TaN] -Plugin disabled with memory leak prevention measures");
     }
 
     /**

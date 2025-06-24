@@ -6,6 +6,11 @@
 #
 
 
+
+
+# modified by idot.__ on discord for chunk modifications
+
+
 ########################
 ##      General       ##
 ########################
@@ -336,6 +341,49 @@ percentageOfChunksUnclaimed: 15.0
 
 #Minimum number of chunks that will be unclaimed if a town cannot pay the territory upkeep
 minimumNumberOfChunksUnclaimed: 5
+
+
+# Chunk Loading Management Settings (Memory Leak Prevention)
+chunkLoadingManagement:
+  # Enable/disable chunk load management (set to false to disable the memory leak fix)
+  enabled: true
+  
+  # Maximum time (in minutes) a claimed chunk can stay loaded without players nearby
+  maxLoadTimeMinutes: 5
+  
+  # Maximum number of claimed chunks to keep loaded simultaneously
+  maxLoadedClaimedChunks: 100
+  
+  # How often (in minutes) to run cleanup checks
+  cleanupIntervalMinutes: 5
+  
+  # Delay (in seconds) before unloading a chunk after it's unclaimed
+  unclaimUnloadDelaySeconds: 5
+  
+  # Enable aggressive cleanup when chunk limit is exceeded
+  aggressiveCleanupWhenOverLimit: true
+  
+  # Log chunk loading/unloading activities (set to false for production)
+  debugLogging: true
+  
+  # Distance (in chunks) around players to keep chunks loaded
+  playerNearbyDistance: 2
+
+# Memory monitoring settings
+memoryMonitoring:
+  # Enable automatic memory monitoring
+  enabled: true
+  
+  # Memory usage percentage threshold to trigger emergency cleanup
+  emergencyCleanupThreshold: 85.0
+  
+  # How often (in minutes) to check memory usage
+  memoryCheckIntervalMinutes: 10
+  
+  # Log memory usage statistics
+  logMemoryStats: false
+
+
 
 ########################
 ##  Private channels  ##
